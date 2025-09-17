@@ -115,7 +115,33 @@ def price_color(price):
   else:
     return "BLUE"
   
+def turn_on_led(color):
+  if color == "RED":
+    led_red.value(1)
+  elif color == "ORANGE":
+    led_orange.value(1)
+  elif color == "YELLOW":
+    led_yellow.value(1)
+  elif color == "GREEN":
+    led_green.value(1)
+  elif color == "BLUE":
+    led_blue.value(1)
+
+def turn_on_next_led(color):
+  if color == "RED":
+    led_red_next.value(1)
+  elif color == "ORANGE":
+    led_orange_next.value(1)
+  elif color == "YELLOW":
+    led_yellow_next.value(1)
+  elif color == "GREEN":
+    led_green_next.value(1)
+  elif color == "BLUE":
+    led_blue_next.value(1)
+  
 current_color = price_color(current_price)
+turn_on_led(current_color)
 print(f"Current price color: {current_color}")
 next_color = price_color(next_price)
+turn_on_next_led(next_color)
 print(f"Next price color: {next_color}")
