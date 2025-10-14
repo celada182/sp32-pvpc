@@ -1,68 +1,24 @@
-import network
+import wifimgr
+from time import sleep
+import machine
 import urequests
-import ntptime
 import time
-from machine import Pin
-
-led_red = Pin(12, Pin.OUT)
-led_orange = Pin(14, Pin.OUT)
-led_yellow = Pin(27, Pin.OUT)
-led_green = Pin(26, Pin.OUT)
-led_blue = Pin(25, Pin.OUT)
-
-led_red.value(1)
-time.sleep(0.5)
-led_red.value(0)
-led_orange.value(1)
-time.sleep(0.5)
-led_orange.value(0)
-led_yellow.value(1)
-time.sleep(0.5)
-led_yellow.value(0)
-led_green.value(1)
-time.sleep(0.5)
-led_green.value(0)
-led_blue.value(1)
-time.sleep(0.5)
-led_blue.value(0)
-
-led_red_next = Pin(18, Pin.OUT)
-led_orange_next = Pin(5, Pin.OUT)
-led_yellow_next = Pin(17, Pin.OUT)
-led_green_next = Pin(16, Pin.OUT)
-led_blue_next = Pin(4, Pin.OUT)
-
-led_red_next.value(1)
-time.sleep(0.5)
-led_red_next.value(0)
-led_orange_next.value(1)
-time.sleep(0.5)
-led_orange_next.value(0)
-led_yellow_next.value(1)
-time.sleep(0.5)
-led_yellow_next.value(0)
-led_green_next.value(1)
-time.sleep(0.5)
-led_green_next.value(0)
-led_blue_next.value(1)
-time.sleep(0.5)
-led_blue_next.value(0)
-
-sta_if = network.WLAN(network.STA_IF)
-if not sta_if.isconnected():
-  print("Connecting to WiFi: ", end="")
-  sta_if.active(True)
-  sta_if.connect('Wokwi-GUEST', '')
-  while not sta_if.isconnected():
-    print(".", end="")
-    time.sleep(0.1)
-  print(" Connected!")
 
 try:
-  ntptime.settime()
-  print("Local time synchronization completed")
+  import usocket as socket
 except:
-  print("Error syncing time")
+  import socket
+
+led = machine.Pin(2, machine.Pin.OUT)
+
+wlan = wifimgr.get_connection()
+if wlan is None:
+    print("Could not initialize the network connection.")
+    while True:
+        pass  # you shall not pass :D
+
+# Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
+print("ESP OK")
 
 localtime = time.localtime()
 today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
@@ -72,7 +28,7 @@ print("Fetching ESIOS data: ", end="")
 url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
 resp = urequests.get(url)
 data = resp.json()
-print("Data fetched!") 
+print("Data fetched!")
 
 current_hour = localtime[3] + 2  # Adjust for timezone if necessary
 print(f"Current hour: {current_hour}h")
@@ -114,34 +70,60 @@ def price_color(price):
     return "GREEN"
   else:
     return "BLUE"
-  
-def turn_on_led(color):
-  if color == "RED":
-    led_red.value(1)
-  elif color == "ORANGE":
-    led_orange.value(1)
-  elif color == "YELLOW":
-    led_yellow.value(1)
-  elif color == "GREEN":
-    led_green.value(1)
-  elif color == "BLUE":
-    led_blue.value(1)
 
-def turn_on_next_led(color):
-  if color == "RED":
-    led_red_next.value(1)
-  elif color == "ORANGE":
-    led_orange_next.value(1)
-  elif color == "YELLOW":
-    led_yellow_next.value(1)
-  elif color == "GREEN":
-    led_green_next.value(1)
-  elif color == "BLUE":
-    led_blue_next.value(1)
-  
 current_color = price_color(current_price)
-turn_on_led(current_color)
 print(f"Current price color: {current_color}")
 next_color = price_color(next_price)
-turn_on_next_led(next_color)
 print(f"Next price color: {next_color}")
+
+def web_page():
+  if led.value() == 1:
+    gpio_state="ON"
+  else:
+    gpio_state="OFF"
+  
+  html = """<html><head> <title>ESP Web Server</title> <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,"> <style>html{font-family: Helvetica; display:inline-block; margin: 0px auto; text-align: center;}
+  h1{color: #0F3376; padding: 2vh;}p{font-size: 1.5rem;}.button{display: inline-block; background-color: #e7bd3b; border: none; 
+  border-radius: 4px; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}
+  .button2{background-color: #4286f4;}</style></head><body> <h1>ESP Web Server</h1> 
+  <p>GPIO state: <strong>""" + gpio_state + """</strong></p><p><a href="/?led=on"><button class="button">ON</button></a></p>
+  <p><a href="/?led=off"><button class="button button2">OFF</button></a></p></body></html>"""
+  return html
+  
+try:
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  s.bind(('', 80))
+  s.listen(5)
+except OSError as e:
+  machine.reset()
+
+while True:
+  try:
+    if gc.mem_free() < 102000:
+      gc.collect()
+    conn, addr = s.accept()
+    conn.settimeout(3.0)
+    print('Got a connection from %s' % str(addr))
+    request = conn.recv(1024)
+    conn.settimeout(None)
+    request = str(request)
+    print('Content = %s' % request)
+    led_on = request.find('/?led=on')
+    led_off = request.find('/?led=off')
+    if led_on == 6:
+      print('LED ON')
+      led.value(1)
+    if led_off == 6:
+      print('LED OFF')
+      led.value(0)
+    response = web_page()
+    conn.send('HTTP/1.1 200 OK\n')
+    conn.send('Content-Type: text/html\n')
+    conn.send('Connection: close\n\n')
+    conn.sendall(response)
+    conn.close()
+  except OSError as e:
+    conn.close()
+    print('Connection closed')
