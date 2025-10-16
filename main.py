@@ -3,6 +3,10 @@ from time import sleep
 import machine
 import urequests
 import time
+from machine import Pin, SPI
+import gc9a01
+
+from truetype import NotoSans_32 as noto_sans
 
 try:
   import usocket as socket
@@ -61,20 +65,57 @@ print(f"Today's maximum {sorted_prices[23]} €/MWh ------ RED")
 
 def price_color(price):
   if price == red:
-    return "RED"
+    return gc9a01.RED
   elif red > price >= orange:
-    return "ORANGE"
+    return gc9a01.ORANGE
   elif orange > price >= yellow:
-    return "YELLOW"
+    return gc9a01.YELLOW
   elif yellow > price >= green:
-    return "GREEN"
+    return gc9a01.GREEN
   else:
-    return "BLUE"
+    return gc9a01.BLUE
 
 current_color = price_color(current_price)
 print(f"Current price color: {current_color}")
 next_color = price_color(next_price)
 print(f"Next price color: {next_color}")
+
+def center(font, s, row, color=gc9a01.WHITE):
+    screen = tft.width()                     # get screen width
+    width = tft.write_len(font, s)           # get the width of the string
+    if width and width < screen:             # if the string < display
+        col = tft.width() // 2 - width // 2  # find the column to center
+    else:                                    # otherwise
+        col = 0                              # left justify
+
+    tft.write(font, s, col, row, color)      # and write the string
+
+tft = gc9a01.GC9A01(
+    SPI(2, baudrate=80000000, polarity=0, sck=Pin(10), mosi=Pin(11)),
+    240,
+    240,
+    reset=Pin(12, Pin.OUT),
+    cs=Pin(9, Pin.OUT),
+    dc=Pin(8, Pin.OUT),
+    backlight=Pin(40, Pin.OUT),
+    rotation=0,
+    buffer_size=16*32*2)
+
+tft.init()
+tft.fill(gc9a01.BLACK)
+
+# center the name of the first font, using the font
+row = 60
+center(noto_sans, "CURRENT", row, current_color)
+row += noto_sans.HEIGHT
+center(noto_sans, f"{current_price} €/MWh", row, current_color)
+row += noto_sans.HEIGHT
+
+# center the name of the second font, using the font
+center(noto_sans, "NEXT", row, next_color)
+row += noto_sans.HEIGHT
+center(noto_sans, f"{next_price} €/MWh", row, next_color)
+row += noto_sans.HEIGHT
 
 def web_page():
   if led.value() == 1:
@@ -127,3 +168,4 @@ while True:
   except OSError as e:
     conn.close()
     print('Connection closed')
+
