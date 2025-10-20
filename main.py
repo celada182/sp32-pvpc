@@ -6,7 +6,9 @@ import time
 from machine import Pin, SPI
 import gc9a01
 
-from truetype import NotoSans_32 as noto_sans
+#from truetype import NotoSans_32 as font
+from bitmap import vga1_8x16 as small_font
+from bitmap import vga1_16x32 as font
 
 try:
   import usocket as socket
@@ -58,8 +60,12 @@ def fetch_data():
 def get_data():
     data = None
     while data is None:
-        data = fetch_data()
-    print("Data fetched!")
+        try:
+            data = fetch_data()
+        except ValueError:
+            print("Error getting data")
+        else:
+            print("Data fetched!")
 
     current_price = None
     next_price = None
@@ -103,18 +109,14 @@ def get_data():
     current_color = price_color(current_price)
     next_color = price_color(next_price)
 
-    # center the name of the first font, using the font
-    row = 60
-    center(noto_sans, "CURRENT", row, current_color)
-    row += noto_sans.HEIGHT
-    center(noto_sans, f"{current_price}", row, current_color)
-    row += noto_sans.HEIGHT
+    tft.text(small_font, "Current price", 20, 60, gc9a01.WHITE)
+    tft.text(font, f"{current_price}", 50, 80, current_color)
+    tft.text(small_font, "EUR/MWh", 160, 90, current_color)
+    
+    tft.text(small_font, "Next price", 20, 120, gc9a01.WHITE)
+    tft.text(font, f"{next_price}", 50, 140, next_color)
+    tft.text(small_font, "EUR/MWh", 160, 150, next_color)
 
-    # center the name of the second font, using the font
-    center(noto_sans, "NEXT", row, next_color)
-    row += noto_sans.HEIGHT
-    center(noto_sans, f"{next_price}", row, next_color)
-    row += noto_sans.HEIGHT
 
 # Main
 while True:
@@ -123,6 +125,7 @@ while True:
     current_hour = localtime[3] # Adjust for timezone if necessary
     if (current_hour != previous_hour):
         print("Today's date:", today)
+        tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
         previous_hour = current_hour
         print(f"Current hour: {current_hour}h")
         get_data()
