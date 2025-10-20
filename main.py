@@ -49,11 +49,16 @@ tft = gc9a01.GC9A01(
 tft.init()
 tft.fill(gc9a01.BLACK)
 
-def get_data():
+def fetch_data():
     print("Fetching ESIOS data: ", end="")
     url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
     resp = urequests.get(url)
-    data = resp.json()
+    return resp.json()
+
+def get_data():
+    data = None
+    while data is None:
+        data = fetch_data()
     print("Data fetched!")
 
     current_price = None
@@ -96,15 +101,13 @@ def get_data():
         return gc9a01.BLUE
 
     current_color = price_color(current_price)
-    print(f"Current price color: {current_color}")
     next_color = price_color(next_price)
-    print(f"Next price color: {next_color}")
 
     # center the name of the first font, using the font
     row = 60
     center(noto_sans, "CURRENT", row, current_color)
     row += noto_sans.HEIGHT
-    center(noto_sans, f"{current_price} EUR / MWh", row, current_color)
+    center(noto_sans, f"{current_price}", row, current_color)
     row += noto_sans.HEIGHT
 
     # center the name of the second font, using the font
