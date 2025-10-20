@@ -124,6 +124,7 @@ while True:
     today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
     current_hour = localtime[3] # Adjust for timezone if necessary
     if (current_hour != previous_hour):
+        tft.fill(gc9a01.BLACK)
         print("Today's date:", today)
         tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
         previous_hour = current_hour
