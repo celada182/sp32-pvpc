@@ -87,25 +87,27 @@ def get_data():
     for item in data["PVPC"]:
       hour = int(item["Hora"].split("-")[0])
       price = float(item["PCB"].replace(",", "."))
+      # Convert price MWh to KWh
+      price = price / 1000
       prices.append(price)
       if hour == current_hour:
         current_price = price
-        print(f"Current hour price: {price} €/MWh")
+        print(f"Current hour price: {price} €/KWh")
       if hour == current_hour + 1:
         next_price = price
-        print(f"Next hour price: {price} €/MWh")
+        print(f"Next hour price: {price} €/KWh")
 
     sorted_prices = sorted(prices)
     blue = sorted_prices[0]
-    print(f"Today's minimum {blue} €/MWh ------ BLUE")
+    print(f"Today's minimum {blue} €/KWh ------ BLUE")
     green = sorted_prices[5]
-    print(f"Today's next minimum {green} €/MWh ------ GREEN")
+    print(f"Today's next minimum {green} €/KWh ------ GREEN")
     yellow = sorted_prices[11]
-    print(f"Today's mid {yellow} €/MWh ------ YELLOW")
+    print(f"Today's mid {yellow} €/KWh ------ YELLOW")
     orange = sorted_prices[17]
-    print(f"Today's previous maximum {orange} €/MWh ------ ORANGE")
+    print(f"Today's previous maximum {orange} €/KWh ------ ORANGE")
     red = sorted_prices[23]
-    print(f"Today's maximum {red} €/MWh ------ RED")
+    print(f"Today's maximum {red} €/KWh ------ RED")
     
     def price_color(price):
       if price == red:
@@ -125,12 +127,12 @@ def get_data():
     tft.fill_rect(0, 50, 120, 140, current_color)
     tft.text(small_font, "Actual", 20, 60, gc9a01.BLACK, current_color)
     tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
-    tft.text(small_font, "EUR/MWh", 20, 170, gc9a01.BLACK, current_color)
+    tft.text(small_font, "EUR/KWh", 20, 170, gc9a01.BLACK, current_color)
     
     tft.fill_rect(120, 50, 120, 140, next_color)
     tft.text(small_font, "Siguiente", 140, 60, gc9a01.BLACK, next_color)
     tft.text(small_font, f"{next_price}", 140, 150, gc9a01.BLACK, next_color)
-    tft.text(small_font, "EUR/MWh", 140, 170, gc9a01.BLACK, next_color)
+    tft.text(small_font, "EUR/KWh", 140, 170, gc9a01.BLACK, next_color)
     
     # Legend
     tft.text(small_font, "Min", 45, 200, gc9a01.WHITE)
