@@ -122,15 +122,24 @@ def get_data():
     current_color = price_color(current_price)
     next_color = price_color(next_price)
     
-    tft.fill_rect(0, 60, 120, 140, current_color)
-    tft.text(small_font, "Actual", 20, 80, gc9a01.BLACK, current_color)
+    tft.fill_rect(0, 50, 120, 140, current_color)
+    tft.text(small_font, "Actual", 20, 60, gc9a01.BLACK, current_color)
     tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
     tft.text(small_font, "EUR/MWh", 20, 170, gc9a01.BLACK, current_color)
     
-    tft.fill_rect(120, 60, 120, 140, next_color)
-    tft.text(small_font, "Siguiente", 140, 80, gc9a01.BLACK, next_color)
+    tft.fill_rect(120, 50, 120, 140, next_color)
+    tft.text(small_font, "Siguiente", 140, 60, gc9a01.BLACK, next_color)
     tft.text(small_font, f"{next_price}", 140, 150, gc9a01.BLACK, next_color)
     tft.text(small_font, "EUR/MWh", 140, 170, gc9a01.BLACK, next_color)
+    
+    # Legend
+    tft.text(small_font, "Min", 45, 200, gc9a01.WHITE)
+    tft.fill_rect(80, 205, 10, 10, gc9a01.BLUE)
+    tft.fill_rect(95, 205, 10, 10, gc9a01.GREEN)
+    tft.fill_rect(110, 205, 10, 10, gc9a01.YELLOW)
+    tft.fill_rect(125, 205, 10, 10, gc9a01.color565(255,165,0))
+    tft.fill_rect(140, 205, 10, 10, gc9a01.RED)
+    tft.text(small_font, "Max", 160, 200, gc9a01.WHITE)
 
 
 # Main
