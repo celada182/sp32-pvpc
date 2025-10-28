@@ -37,8 +37,8 @@ tft.text(small_font, "Connectar red Wi-Fi:", 30, 40, gc9a01.WHITE)
 tft.text(font, "WifiManager", 30, 60, gc9a01.WHITE)
 tft.text(small_font, "Abri en navegador web:", 30, 100, gc9a01.WHITE)
 tft.text(font, "192.168.4.1", 30, 120, gc9a01.WHITE)
-tft.text(small_font, "Selccionar red Wi-Fi", 30, 150, gc9a01.WHITE)
-tft.text(small_font, "Introducir contrasena", 30, 170, gc9a01.WHITE)
+tft.text(small_font, "Selccionar red Wi-Fi", 30, 160, gc9a01.WHITE)
+tft.text(small_font, "Introducir contrasena", 30, 180, gc9a01.WHITE)
 
 
 wlan = wifimgr.get_connection()
