@@ -49,6 +49,9 @@ if wlan is None:
 
 # Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
 print("Internet Connection OK")
+tft.fill(gc9a01.BLACK)
+tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
+tft.fill(gc9a01.BLACK)
 
 previous_hour = -1
 def center(font, s, row, color=gc9a01.WHITE):
@@ -118,14 +121,16 @@ def get_data():
 
     current_color = price_color(current_price)
     next_color = price_color(next_price)
-
-    tft.text(small_font, "Current price", 20, 60, gc9a01.WHITE)
-    tft.text(font, f"{current_price}", 50, 80, current_color)
-    tft.text(small_font, "EUR/MWh", 160, 90, current_color)
     
-    tft.text(small_font, "Next price", 20, 120, gc9a01.WHITE)
-    tft.text(font, f"{next_price}", 50, 140, next_color)
-    tft.text(small_font, "EUR/MWh", 160, 150, next_color)
+    tft.fill_rect(0, 60, 120, 140, current_color)
+    tft.text(small_font, "Actual", 20, 80, gc9a01.BLACK, current_color)
+    tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
+    tft.text(small_font, "EUR/MWh", 20, 170, gc9a01.BLACK, current_color)
+    
+    tft.fill_rect(120, 60, 120, 140, next_color)
+    tft.text(small_font, "Siguiente", 140, 80, gc9a01.BLACK, next_color)
+    tft.text(small_font, f"{next_price}", 140, 150, gc9a01.BLACK, next_color)
+    tft.text(small_font, "EUR/MWh", 140, 170, gc9a01.BLACK, next_color)
 
 
 # Main
