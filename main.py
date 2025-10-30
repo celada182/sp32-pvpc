@@ -55,7 +55,6 @@ tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
 tft.fill(gc9a01.BLACK)
 
 previous_hour = -1
-previous_minute = -1
 
 def center(font, s, row, color=gc9a01.WHITE):
         screen = tft.width()                     # get screen width
@@ -153,14 +152,11 @@ while True:
     localtime = time.localtime()
     today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
     current_hour = localtime[3] # Adjust for timezone if necessary
-    current_minute = localtime[4]
-    #if (current_hour != previous_hour):
-    if (current_minute != previous_minute):
+    if (current_hour != previous_hour):
         tft.fill(gc9a01.BLACK)
         print("Today's date:", today)
         tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
-        #previous_hour = current_hour
-        previous_minute = current_minute
+        previous_hour = current_hour
         print(f"Current hour: {current_hour}h")
         get_data()
 
