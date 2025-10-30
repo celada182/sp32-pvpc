@@ -5,6 +5,7 @@ import urequests
 import time
 from machine import Pin, SPI
 import gc9a01
+import random
 
 #from truetype import NotoSans_32 as font
 from bitmap import vga1_8x16 as small_font
@@ -35,7 +36,7 @@ led = machine.Pin(2, machine.Pin.OUT)
 tft.text(small_font, "Configuracion", 60, 20, gc9a01.WHITE)
 tft.text(small_font, "Connectar red Wi-Fi:", 30, 40, gc9a01.WHITE)
 tft.text(font, "WifiManager", 30, 60, gc9a01.WHITE)
-tft.text(small_font, "Abri en navegador web:", 30, 100, gc9a01.WHITE)
+tft.text(small_font, "Abrir en navegador web:", 30, 100, gc9a01.WHITE)
 tft.text(font, "192.168.4.1", 30, 120, gc9a01.WHITE)
 tft.text(small_font, "Selccionar red Wi-Fi", 30, 160, gc9a01.WHITE)
 tft.text(small_font, "Introducir contrasena", 30, 180, gc9a01.WHITE)
@@ -54,6 +55,8 @@ tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
 tft.fill(gc9a01.BLACK)
 
 previous_hour = -1
+previous_minute = -1
+
 def center(font, s, row, color=gc9a01.WHITE):
         screen = tft.width()                     # get screen width
         width = tft.write_len(font, s)           # get the width of the string
@@ -65,20 +68,21 @@ def center(font, s, row, color=gc9a01.WHITE):
         tft.write(font, s, col, row, color)      # and write the string
 
 def fetch_data():
-    print("Fetching ESIOS data: ", end="")
-    url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
-    resp = urequests.get(url)
-    return resp.json()
+    max_attempts = 5
+    attempts = 0
+    response = None
+    while attempts < max_attempts and response is None :
+        attempts = attempts + 1
+        print("Fetching ESIOS data: ")
+        url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
+        try:
+            resp = urequests.get(url)
+            return resp.json()
+        except:
+            print("Error fetching")
 
 def get_data():
-    data = None
-    while data is None:
-        try:
-            data = fetch_data()
-        except ValueError:
-            print("Error getting data")
-        else:
-            print("Data fetched!")
+    data = fetch_data()
 
     current_price = None
     next_price = None
@@ -149,11 +153,14 @@ while True:
     localtime = time.localtime()
     today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
     current_hour = localtime[3] # Adjust for timezone if necessary
-    if (current_hour != previous_hour):
+    current_minute = localtime[4]
+    #if (current_hour != previous_hour):
+    if (current_minute != previous_minute):
         tft.fill(gc9a01.BLACK)
         print("Today's date:", today)
         tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
-        previous_hour = current_hour
+        #previous_hour = current_hour
+        previous_minute = current_minute
         print(f"Current hour: {current_hour}h")
         get_data()
 
