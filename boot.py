@@ -93,7 +93,7 @@ def get_data():
     current_color = price_color(current_price)
     next_color = price_color(next_price)
     
-    tft.fill_rect(0, 50, 120, 140, current_color)
+    tft.fill_rect(0, 50, 119, 140, current_color)
     tft.text(small_font, "Actual", 20, 60, gc9a01.BLACK, current_color)
     tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
     tft.text(small_font, "EUR/KWh", 20, 170, gc9a01.BLACK, current_color)
