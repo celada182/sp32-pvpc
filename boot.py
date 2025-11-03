@@ -76,7 +76,10 @@ def fetch_data():
         url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
         try:
             resp = urequests.get(url)
-            return resp.json()
+            data = resp.json()
+            if (data["PVPC"] is None):
+                raise Exception("No PVPC data")
+            return data
         except:
             print("Error fetching")
 
@@ -211,5 +214,6 @@ while True:
   except OSError as e:
     conn.close()
     print('Connection closed')
+
 
 
