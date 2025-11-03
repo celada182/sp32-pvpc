@@ -6,6 +6,7 @@ import time
 from machine import Pin, SPI
 import gc9a01
 import random
+import ntptime
 
 #from truetype import NotoSans_32 as font
 from bitmap import vga1_8x16 as small_font
@@ -15,46 +16,6 @@ try:
   import usocket as socket
 except:
   import socket
-
-# Screen
-tft = gc9a01.GC9A01(
-    SPI(2, baudrate=80000000, polarity=0, sck=Pin(10), mosi=Pin(11)),
-    240,
-    240,
-    reset=Pin(12, Pin.OUT),
-    cs=Pin(9, Pin.OUT),
-    dc=Pin(8, Pin.OUT),
-    backlight=Pin(40, Pin.OUT),
-    rotation=0,
-    buffer_size=16*32*2)
-
-tft.init()
-tft.fill(gc9a01.BLACK)
-
-led = machine.Pin(2, machine.Pin.OUT)
-
-tft.text(small_font, "Configuracion", 60, 20, gc9a01.WHITE)
-tft.text(small_font, "Connectar red Wi-Fi:", 30, 40, gc9a01.WHITE)
-tft.text(font, "WifiManager", 30, 60, gc9a01.WHITE)
-tft.text(small_font, "Abrir en navegador web:", 30, 100, gc9a01.WHITE)
-tft.text(font, "192.168.4.1", 30, 120, gc9a01.WHITE)
-tft.text(small_font, "Selccionar red Wi-Fi", 30, 160, gc9a01.WHITE)
-tft.text(small_font, "Introducir contrasena", 30, 180, gc9a01.WHITE)
-
-
-wlan = wifimgr.get_connection()
-if wlan is None:
-    print("Could not initialize the network connection.")
-    while True:
-        pass  # you shall not pass :D
-
-# Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
-print("Internet Connection OK")
-tft.fill(gc9a01.BLACK)
-tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
-tft.fill(gc9a01.BLACK)
-
-previous_hour = -1
 
 def center(font, s, row, color=gc9a01.WHITE):
         screen = tft.width()                     # get screen width
@@ -69,19 +30,21 @@ def center(font, s, row, color=gc9a01.WHITE):
 def fetch_data():
     max_attempts = 5
     attempts = 0
-    response = None
-    while attempts < max_attempts and response is None :
+    data = {"PVPC": []}
+    while attempts < max_attempts:
         attempts = attempts + 1
         print("Fetching ESIOS data: ")
         url = "https://api.esios.ree.es/archives/70/download_json?locale=es&date=" + today
         try:
             resp = urequests.get(url)
-            data = resp.json()
-            if (data["PVPC"] is None):
+            json = resp.json()
+            if ("PVPC" in json):
+                return json
+            else:
                 raise Exception("No PVPC data")
-            return data
         except:
             print("Error fetching")
+    return data
 
 def get_data():
     data = fetch_data()
@@ -151,17 +114,69 @@ def get_data():
 
 
 # Main
-while True:
-    localtime = time.localtime()
-    today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
-    current_hour = localtime[3] # Adjust for timezone if necessary
-    if (current_hour != previous_hour):
-        tft.fill(gc9a01.BLACK)
-        print("Today's date:", today)
-        tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
-        previous_hour = current_hour
-        print(f"Current hour: {current_hour}h")
-        get_data()
+
+# Screen
+tft = gc9a01.GC9A01(
+    SPI(2, baudrate=80000000, polarity=0, sck=Pin(10), mosi=Pin(11)),
+    240,
+    240,
+    reset=Pin(12, Pin.OUT),
+    cs=Pin(9, Pin.OUT),
+    dc=Pin(8, Pin.OUT),
+    backlight=Pin(40, Pin.OUT),
+    rotation=0,
+    buffer_size=16*32*2)
+
+tft.init()
+tft.fill(gc9a01.BLACK)
+
+led = machine.Pin(2, machine.Pin.OUT)
+
+tft.text(small_font, "Configuracion", 60, 20, gc9a01.WHITE)
+tft.text(small_font, "Connectar red Wi-Fi:", 30, 40, gc9a01.WHITE)
+tft.text(font, "WifiManager", 30, 60, gc9a01.WHITE)
+tft.text(small_font, "Abrir en navegador web:", 30, 100, gc9a01.WHITE)
+tft.text(font, "192.168.4.1", 30, 120, gc9a01.WHITE)
+tft.text(small_font, "Selccionar red Wi-Fi", 30, 160, gc9a01.WHITE)
+tft.text(small_font, "Introducir contrasena", 30, 180, gc9a01.WHITE)
+
+wlan = wifimgr.get_connection()
+if wlan is None:
+    print("Could not initialize the network connection.")
+    while True:
+        pass  # you shall not pass :D
+
+# Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
+print("Internet Connection OK")
+tft.fill(gc9a01.BLACK)
+tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
+tft.fill(gc9a01.BLACK)
+
+previous_hour = -1
+
+#Localtime setup
+ntptime.host = "1.europe.pool.ntp.org"
+
+try:
+  print("Local time before synchronization：%s" %str(time.localtime()))
+  #make sure to have internet connection
+  ntptime.settime()
+  print("Local time after synchronization：%s" %str(time.localtime()))
+except:
+  print("Error syncing time")
+
+if wlan is not None:
+    while True:
+        localtime = time.localtime()
+        today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
+        current_hour = localtime[3] # Adjust for timezone if necessary
+        if (current_hour != previous_hour):
+            tft.fill(gc9a01.BLACK)
+            print("Today's date:", today)
+            tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
+            previous_hour = current_hour
+            print(f"Current hour: {current_hour}h")
+            get_data()
 
 def web_page():
   if led.value() == 1:
