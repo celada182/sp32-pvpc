@@ -26,11 +26,7 @@ def center(font, s, row, color=gc9a01.WHITE):
         tft.write(font, s, col, row, color)      # and write the string
 
 def fetch_time():
-    max_attempts = 20
-    attempts = 0
-    data = {"datetime": "2025-01-01T00:00:00.000000+00:00"}
-    while attempts < max_attempts:
-        attempts = attempts + 1
+    while True:
         print("Fetching World Time API: ")
         url = "https://worldtimeapi.org/api/timezone/Europe/Madrid"
         try:
@@ -44,7 +40,7 @@ def fetch_time():
                 raise Exception("No datetime")
         except:
             print("Error fetching time")
-    return data
+            time.sleep(10)
 
 def parse_time(timeStr):
     (year, month, dayAndTime) = timeStr.split("-")
@@ -196,6 +192,7 @@ if wlan is not None:
             previous_day = current_day
             print(f"Current hour: {current_hour}h")
             get_data()
+        time.sleep(60)
 
 def web_page():
   if led.value() == 1:
@@ -248,3 +245,6 @@ while True:
   except OSError as e:
     conn.close()
     print('Connection closed')
+
+
+
