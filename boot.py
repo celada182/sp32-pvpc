@@ -5,8 +5,6 @@ import urequests
 import time
 from machine import Pin, SPI
 import gc9a01
-import random
-import ntptime
 
 #from truetype import NotoSans_32 as font
 from bitmap import vga1_8x16 as small_font
@@ -180,35 +178,22 @@ tft.text(font, "Connectado", 30, 60, gc9a01.WHITE)
 tft.fill(gc9a01.BLACK)
 
 previous_hour = -1
-
-#Localtime setup
-ntptime.host = "1.es.pool.ntp.org"
-
-try:
-  print("Local time before synchronization：%s" %str(time.localtime()))
-  #make sure to have internet connection
-  ntptime.settime()
-  print("Local time after synchronization：%s" %str(time.localtime()))
-except:
-  print("Error syncing time")
+previous_day = -1
 
 if wlan is not None:
     while True:
         timeApi = fetch_time()
-        print(timeApi)
         date = timeApi["datetime"]
-        print(date)
-        parsed = parse_time(date)
-        print(parsed)
-        localtime = time.localtime()
-        print(time.gmtime())
-        today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
-        current_hour = localtime[3] # Adjust for timezone if necessary
-        if (current_hour != previous_hour):
+        (year, month, day, hour, minutes) = parse_time(date)
+        today = "{}-{}-{}".format(year, month, day)
+        current_hour = int(hour)
+        current_day = int(day)
+        if (current_hour != previous_hour or current_day != previous_day):
             tft.fill(gc9a01.BLACK)
             print("Today's date:", today)
             tft.text(small_font, f"{today} {current_hour}h", 60, 30, gc9a01.WHITE)
             previous_hour = current_hour
+            previous_day = current_day
             print(f"Current hour: {current_hour}h")
             get_data()
 
@@ -263,6 +248,3 @@ while True:
   except OSError as e:
     conn.close()
     print('Connection closed')
-
-
-
