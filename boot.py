@@ -27,6 +27,33 @@ def center(font, s, row, color=gc9a01.WHITE):
 
         tft.write(font, s, col, row, color)      # and write the string
 
+def fetch_time():
+    max_attempts = 20
+    attempts = 0
+    data = {"datetime": "2025-01-01T00:00:00.000000+00:00"}
+    while attempts < max_attempts:
+        attempts = attempts + 1
+        print("Fetching World Time API: ")
+        url = "https://worldtimeapi.org/api/timezone/Europe/Madrid"
+        try:
+            resp = urequests.get(url)
+            json = resp.json()
+            print(json)
+            print("datetime" in json)
+            if ("datetime" in json):
+                return json
+            else:
+                raise Exception("No datetime")
+        except:
+            print("Error fetching time")
+    return data
+
+def parse_time(timeStr):
+    (year, month, dayAndTime) = timeStr.split("-")
+    (day, t) = dayAndTime.split("T")
+    (hour, minutes, secondsAndTimeZone, extraZone) = t.split(":")
+    return (year, month, day, hour, minutes)
+
 def fetch_data():
     max_attempts = 5
     attempts = 0
@@ -43,7 +70,7 @@ def fetch_data():
             else:
                 raise Exception("No PVPC data")
         except:
-            print("Error fetching")
+            print("Error fetching data")
     return data
 
 def get_data():
@@ -155,7 +182,7 @@ tft.fill(gc9a01.BLACK)
 previous_hour = -1
 
 #Localtime setup
-ntptime.host = "1.europe.pool.ntp.org"
+ntptime.host = "1.es.pool.ntp.org"
 
 try:
   print("Local time before synchronization：%s" %str(time.localtime()))
@@ -167,7 +194,14 @@ except:
 
 if wlan is not None:
     while True:
+        timeApi = fetch_time()
+        print(timeApi)
+        date = timeApi["datetime"]
+        print(date)
+        parsed = parse_time(date)
+        print(parsed)
         localtime = time.localtime()
+        print(time.gmtime())
         today = "{}-{}-{}".format(localtime[0], localtime[1], localtime[2])
         current_hour = localtime[3] # Adjust for timezone if necessary
         if (current_hour != previous_hour):
