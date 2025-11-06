@@ -27,25 +27,24 @@ def center(font, s, row, color=gc9a01.WHITE):
 
 def fetch_time():
     while True:
-        print("Fetching World Time API: ")
-        url = "https://worldtimeapi.org/api/timezone/Europe/Madrid"
+        print("Fetching Time API: ")
+        url = "https://timeapi.io/api/time/current/zone?timeZone=Europe%2FMadrid"
         try:
             resp = urequests.get(url)
             json = resp.json()
-            print(json)
-            print("datetime" in json)
-            if ("datetime" in json):
+            if ("dateTime" in json):
                 return json
             else:
-                raise Exception("No datetime")
+                print("Error fetching time")
         except:
             print("Error fetching time")
             time.sleep(10)
+            
 
 def parse_time(timeStr):
     (year, month, dayAndTime) = timeStr.split("-")
     (day, t) = dayAndTime.split("T")
-    (hour, minutes, secondsAndTimeZone, extraZone) = t.split(":")
+    (hour, minutes, seconds) = t.split(":")
     return (year, month, day, hour, minutes)
 
 def fetch_data():
@@ -179,7 +178,7 @@ previous_day = -1
 if wlan is not None:
     while True:
         timeApi = fetch_time()
-        date = timeApi["datetime"]
+        date = timeApi["dateTime"]
         (year, month, day, hour, minutes) = parse_time(date)
         today = "{}-{}-{}".format(year, month, day)
         current_hour = int(hour)
@@ -245,6 +244,3 @@ while True:
   except OSError as e:
     conn.close()
     print('Connection closed')
-
-
-
