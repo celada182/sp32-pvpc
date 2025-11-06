@@ -32,13 +32,13 @@ def fetch_time():
         try:
             resp = urequests.get(url)
             json = resp.json()
+            print(json)
             if ("dateTime" in json):
                 return json
             else:
                 print("Error fetching time")
         except:
             print("Error fetching time")
-            time.sleep(10)
             
 
 def parse_time(timeStr):
@@ -191,7 +191,8 @@ if wlan is not None:
             previous_day = current_day
             print(f"Current hour: {current_hour}h")
             get_data()
-        time.sleep(60)
+        print("Waiting 30 seconds")
+        time.sleep(30)
 
 def web_page():
   if led.value() == 1:
