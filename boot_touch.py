@@ -86,51 +86,52 @@ def get_data():
         next_price = price
         print(f"Next hour price: {price} €/KWh")
 
-    sorted_prices = sorted(prices)
-    blue = sorted_prices[0]
-    print(f"Today's minimum {blue} €/KWh ------ BLUE")
-    green = sorted_prices[5]
-    print(f"Today's next minimum {green} €/KWh ------ GREEN")
-    yellow = sorted_prices[11]
-    print(f"Today's mid {yellow} €/KWh ------ YELLOW")
-    orange = sorted_prices[17]
-    print(f"Today's previous maximum {orange} €/KWh ------ ORANGE")
-    red = sorted_prices[23]
-    print(f"Today's maximum {red} €/KWh ------ RED")
-    
-    def price_color(price):
-      if price == red:
-        return gc9a01.RED
-      elif red > price >= orange:
-        return gc9a01.color565(255,165,0)
-      elif orange > price >= yellow:
-        return gc9a01.YELLOW
-      elif yellow > price >= green:
-        return gc9a01.GREEN
-      else:
-        return gc9a01.BLUE
+    if (len(prices) > 0):
+        sorted_prices = sorted(prices)
+        blue = sorted_prices[0]
+        print(f"Today's minimum {blue} €/KWh ------ BLUE")
+        green = sorted_prices[5]
+        print(f"Today's next minimum {green} €/KWh ------ GREEN")
+        yellow = sorted_prices[11]
+        print(f"Today's mid {yellow} €/KWh ------ YELLOW")
+        orange = sorted_prices[17]
+        print(f"Today's previous maximum {orange} €/KWh ------ ORANGE")
+        red = sorted_prices[23]
+        print(f"Today's maximum {red} €/KWh ------ RED")
+        
+        def price_color(price):
+          if price == red:
+            return gc9a01.RED
+          elif red > price >= orange:
+            return gc9a01.color565(255,165,0)
+          elif orange > price >= yellow:
+            return gc9a01.YELLOW
+          elif yellow > price >= green:
+            return gc9a01.GREEN
+          else:
+            return gc9a01.BLUE
 
-    current_color = price_color(current_price)
-    next_color = price_color(next_price)
-    
-    tft.fill_rect(0, 50, 119, 140, current_color)
-    tft.text(small_font, "Actual", 20, 60, gc9a01.BLACK, current_color)
-    tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
-    tft.text(small_font, "EUR/KWh", 20, 170, gc9a01.BLACK, current_color)
-    
-    tft.fill_rect(120, 50, 120, 140, next_color)
-    tft.text(small_font, "Siguiente", 140, 60, gc9a01.BLACK, next_color)
-    tft.text(small_font, f"{next_price}", 140, 150, gc9a01.BLACK, next_color)
-    tft.text(small_font, "EUR/KWh", 140, 170, gc9a01.BLACK, next_color)
-    
-    # Legend
-    tft.text(small_font, "Min", 45, 200, gc9a01.WHITE)
-    tft.fill_rect(80, 205, 10, 10, gc9a01.BLUE)
-    tft.fill_rect(95, 205, 10, 10, gc9a01.GREEN)
-    tft.fill_rect(110, 205, 10, 10, gc9a01.YELLOW)
-    tft.fill_rect(125, 205, 10, 10, gc9a01.color565(255,165,0))
-    tft.fill_rect(140, 205, 10, 10, gc9a01.RED)
-    tft.text(small_font, "Max", 160, 200, gc9a01.WHITE)
+        current_color = price_color(current_price)
+        next_color = price_color(next_price)
+        
+        tft.fill_rect(0, 50, 119, 140, current_color)
+        tft.text(small_font, "Actual", 20, 60, gc9a01.BLACK, current_color)
+        tft.text(small_font, f"{current_price}", 20, 150, gc9a01.BLACK, current_color)
+        tft.text(small_font, "EUR/KWh", 20, 170, gc9a01.BLACK, current_color)
+        
+        tft.fill_rect(120, 50, 120, 140, next_color)
+        tft.text(small_font, "Siguiente", 140, 60, gc9a01.BLACK, next_color)
+        tft.text(small_font, f"{next_price}", 140, 150, gc9a01.BLACK, next_color)
+        tft.text(small_font, "EUR/KWh", 140, 170, gc9a01.BLACK, next_color)
+        
+        # Legend
+        tft.text(small_font, "Min", 45, 200, gc9a01.WHITE)
+        tft.fill_rect(80, 205, 10, 10, gc9a01.BLUE)
+        tft.fill_rect(95, 205, 10, 10, gc9a01.GREEN)
+        tft.fill_rect(110, 205, 10, 10, gc9a01.YELLOW)
+        tft.fill_rect(125, 205, 10, 10, gc9a01.color565(255,165,0))
+        tft.fill_rect(140, 205, 10, 10, gc9a01.RED)
+        tft.text(small_font, "Max", 160, 200, gc9a01.WHITE)
 
 
 # Main
